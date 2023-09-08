@@ -1,9 +1,7 @@
 name: Run Specific Test
 
 on:
-  pull_request:
-    branches:
-      - argparse_choices
+  workflow_dispatch:
 
 jobs:
   run-test:
