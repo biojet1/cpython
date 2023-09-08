@@ -3,7 +3,7 @@ name: Run Specific Test
 on:
   pull_request:
     branches:
-      - main
+      - argparse_choices
 
 jobs:
   run-test:
