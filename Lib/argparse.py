@@ -41,7 +41,8 @@ The module contains the following public classes:
         example above shows, instances of FileType are typically passed as
         the type= argument of add_argument() calls.
 
-    - Action -- The base class for parser actions. Typically actions are
+    - Action -
+    - The base class for parser actions. Typically actions are
         selected by passing strings like 'store_true' or 'append_const' to
         the action= argument of add_argument(). However, for greater
         customization of ArgumentParser actions, subclasses of Action may
@@ -1248,10 +1249,28 @@ class _SubParsersAction(Action):
         try:
             parser = self._name_parser_map[parser_name]
         except KeyError:
-            args = {'parser_name': parser_name,
-                    'choices': ', '.join(self._name_parser_map)}
-            msg = _('unknown parser %(parser_name)r (choices: %(choices)s)') % args
-            raise ArgumentError(self, msg)
+            chosen = None
+            for kv in self._name_parser_map.items():
+                if not kv[0] or not kv[0].startswith(parser_name):
+                    pass
+                elif chosen and chosen[1] is not kv[1]:
+                    args = {
+                        "parser_name": parser_name,
+                        "choices": ", ".join(kv[0], chosen[0]),
+                    }
+                    msg = _("unknown parser %(parser_name)r (choices: %(choices)s)") % args
+                    raise ArgumentError(self, msg)
+                else:
+                    chosen = kv
+            if chosen:
+                parse = chosen[1]
+            else:
+                args = {
+                    "parser_name": parser_name,
+                    "choices": ", ".join(self._name_parser_map),
+                }
+                msg = _("unknown parser %(parser_name)r (choices: %(choices)s)") % args
+                raise ArgumentError(self, msg)
 
         # parse all the remaining options into the namespace
         # store any unrecognized options on the object, so that the top
